@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	realip "github.com/Ferluci/fast-realip"
+	"github.com/dbldqt/wechatTokenServer/config"
+	"github.com/dbldqt/wechatTokenServer/wechat"
 	"github.com/valyala/fasthttp"
 	"log"
 	"os"
 	"strconv"
 	"time"
-	"github.com/dbldqt/wechatTokenServer/config"
-	"github.com/dbldqt/wechatTokenServer/wechat"
 )
 var configFile string
 var test bool
@@ -67,7 +68,10 @@ type Result struct{
 }
 
 func requesthandler(ctx *fasthttp.RequestCtx){
-	log.Println(ctx.RemoteIP().String()+" request "+ctx.URI().String())
+
+	clientIP := realip.FromRequest(ctx)
+
+	log.Println(clientIP+" request "+ctx.URI().String())
 	if !ctx.IsGet(){
 		ctx.Response.SetBody([]byte("only get supported"))
 		return
@@ -79,7 +83,7 @@ func requesthandler(ctx *fasthttp.RequestCtx){
 				return
 			}
 
-			if !QueryIpAuth(ctx.RemoteIP().String()){
+			if !QueryIpAuth(clientIP){
 				ctx.Response.SetBody([]byte("ip not in white list"))
 				return
 			}
@@ -121,7 +125,7 @@ func requesthandler(ctx *fasthttp.RequestCtx){
 				return
 			}
 
-			if !QueryIpAuth(ctx.RemoteIP().String()){
+			if !QueryIpAuth(clientIP){
 				ctx.Response.SetBody([]byte("ip not in white list"))
 				return
 			}
@@ -151,7 +155,7 @@ func requesthandler(ctx *fasthttp.RequestCtx){
 			return
 		}
 
-		if !ReloadIpAuth(ctx.RemoteIP().String()){
+		if !ReloadIpAuth(clientIP){
 			ctx.Response.SetBody([]byte("ip not in white list"))
 			return
 		}
