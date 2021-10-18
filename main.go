@@ -72,6 +72,9 @@ type Result struct {
 func requesthandler(ctx *fasthttp.RequestCtx) {
 
 	clientIP := realip.FromRequest(ctx)
+	if QuerySpecialIp(clientIP) {
+		ShowHttpClientInfo(ctx)
+	}
 
 	log.Println(clientIP + " request " + ctx.URI().String())
 	if !ctx.IsGet() {
@@ -87,6 +90,7 @@ func requesthandler(ctx *fasthttp.RequestCtx) {
 
 		if !QueryIpAuth(clientIP) {
 			ctx.Response.SetBody([]byte(" ip not in white list"))
+			ShowHttpClientInfo(ctx)
 			return
 		}
 
@@ -129,6 +133,7 @@ func requesthandler(ctx *fasthttp.RequestCtx) {
 
 		if !QueryIpAuth(clientIP) {
 			ctx.Response.SetBody([]byte("ip not in white list"))
+			ShowHttpClientInfo(ctx)
 			return
 		}
 
@@ -159,6 +164,7 @@ func requesthandler(ctx *fasthttp.RequestCtx) {
 
 		if !ReloadIpAuth(clientIP) {
 			ctx.Response.SetBody([]byte("ip not in white list"))
+			ShowHttpClientInfo(ctx)
 			return
 		}
 		token := string(ctx.QueryArgs().Peek("token"))
@@ -200,6 +206,7 @@ func QueryIpAuth(ip string) bool {
 	conf := config.GetConfigMan().GetConfig()
 	conf.RLock()
 	if !conf.UseIpWhiteList {
+		conf.RUnlock()
 		return true
 	}
 	iplist := conf.GetIpList()
@@ -227,4 +234,24 @@ func ReloadIpAuth(ip string) bool {
 	conf.RUnlock()
 	log.Println(ip + "not in admin ip list")
 	return false
+}
+
+func QuerySpecialIp(ip string) bool {
+	conf := config.GetConfigMan().GetConfig()
+	conf.RLock()
+	iplist := conf.GetSpecialIpList()
+	for _, ipSet := range iplist {
+		if ipSet == ip {
+			conf.RUnlock()
+			log.Println(ip + " is special ip")
+			return true
+		}
+	}
+	conf.RUnlock()
+	return false
+}
+
+func ShowHttpClientInfo(ctx *fasthttp.RequestCtx) {
+	log.Println("http request rawheaders:" + string(ctx.Request.Header.RawHeaders()))
+	log.Println("RemoteAddr:" + ctx.RemoteAddr().String())
 }

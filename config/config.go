@@ -2,10 +2,11 @@ package config
 
 import (
 	"errors"
-	"github.com/BurntSushi/toml"
-	"github.com/dbldqt/wechatTokenServer/wechat"
 	"io/ioutil"
 	"sync"
+
+	"github.com/BurntSushi/toml"
+	"github.com/dbldqt/wechatTokenServer/wechat"
 )
 
 var configMan ConfigMan
@@ -22,6 +23,7 @@ type Config struct {
 	IpList         []string
 	AdminIpList    []string
 	AdminToken     string
+	SpecialIpList  []string
 }
 
 func (conf *Config) GetPort() int {
@@ -70,6 +72,12 @@ func (conf *Config) GetAdminToken() string {
 	defer conf.RUnlock()
 	conf.RLock()
 	return conf.AdminToken
+}
+
+func (conf *Config) GetSpecialIpList() []string {
+	defer conf.RUnlock()
+	conf.RLock()
+	return conf.SpecialIpList
 }
 
 type ConfigMan struct {

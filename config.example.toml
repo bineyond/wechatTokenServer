@@ -21,6 +21,9 @@ UseIpWhiteList = false
 #普通请求的ip白名单,如果启用ip白名单，但是白名单列表为空，自动添加127.0.0.1到白名单
 IpList = ["127.0.0.1"]
 
+#显示http client http headers
+SpecialIpList = ["127.0.0.1"]
+
 #下面是微信公众号或者小程序的相关配置，支持配置多个，token为查询accetoken时带过来的token参数,例如getaccesstoken?id=&token=
 [[Wechat]]
 "AppID" = ""                 #微信公众号或者小程序的appid
