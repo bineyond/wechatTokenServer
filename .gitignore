@@ -3,3 +3,4 @@
 config.toml
 wechatTokenServer.toml
 wechatTokenServer
+.DS_Store
